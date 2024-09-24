@@ -1,3 +1,5 @@
+{% load menu %}
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -15,8 +17,8 @@
         <div class="logo">
             <a href="/" class="text-2xl text-white">GroceryNet</a>
         </div>
-        <div class="menu">
-            <a href="{% url "about" %}" class="text-white">About</a>
+        <div class="menu flex space-x-4">
+            {% menu %}
         </div>
     </nav>
 

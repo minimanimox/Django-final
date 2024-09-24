@@ -14,10 +14,12 @@ class Category(models.Model):
 class Product(models.Model):
     user = models.ForeignKey(User, related_name='products', on_delete=models.CASCADE)
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
-    title = models.CharField(max_length=50)
+    product_name = models.CharField(max_length=50)
+    product_id = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50)
     description = models.TextField(blank=True)
     price = models.FloatField()
+    image = models.ImageField(upload_to='uploads/product_images/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -25,6 +27,6 @@ class Product(models.Model):
         ordering = ('-created_at',)  #표시 순서 변경
         
     def __str__(self):
-        return self.title
+        return self.product_name
     
     

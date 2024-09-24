@@ -1,12 +1,21 @@
 {% extends "core/base.html" %}
 
 {% block title %}
-    {{ product.title }} 
+    {{ product.product_name }} 
 {% endblock title %}
         
 {% block content %}
-    <h1 class="text-2xl">{{ product.title }}</h1>
-    <p class="text-xs text-gray-500">{{ product.price|floatformat:2 }}</p>
+    {% if product.image %}
+        <div class="image mb-4">
+            <img src="{{ product.image.url }}" alt="Image of {{ product.product_name }}">
+        </div>
+    {% endif %}
+    <h1 class="text-2xl">{{ product.product_name }}</h1>
+    <p class="text-xs text-gray-500">
+        {{ product.price|floatformat:2 }}
+        -
+        {% firstof product.user.get_full_name product.user.username %}
+    </p>
     
     {% if product.description %}
         <p class="mt-4">{{ product.description}}</p>
