@@ -1,13 +1,13 @@
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.utils.text import slugify
-from store.models import Product, Category
 from .models import Userprofile
 from store.forms import ProductForm
-
+from store.models import Product
 import uuid
 
 def signup(request):
@@ -31,7 +31,11 @@ def signup(request):
 
 @login_required    
 def staff_page(request):
-    return render(request, 'userprofile/staff_page.html')
+    products = request.user.products.exclude(status=Product.DELETED)
+    
+    return render(request, 'userprofile/staff_page.html', {
+        'products': products
+    })
 
 @login_required
 def myaccount(request):
@@ -40,9 +44,11 @@ def myaccount(request):
 
 def staff_detail(request, pk):
     user = User.objects.get(pk=pk)
+    products = user.products.filter(status=Product.ACTIVE)
     
     return render(request, 'userprofile/staff_detail.html', {
-        'user': user
+        'user': user,
+        'products': products,
     })
 
 @login_required
@@ -62,7 +68,8 @@ def add_product(request):
             product.slug = slugify(f"{product_name}-{uuid.uuid4().hex[:6]}")  # 고유한 slug 생성
             print(f"Product slug generated: {product.slug}")  # 디버깅용 로그 추가
             product.save()
-            print(f"Product saved: {product}")  # 디버깅용 로그 추가
+        
+            messages.success(request, 'The product was added.')
             
             return redirect('staff_page')
         else:
@@ -71,4 +78,39 @@ def add_product(request):
     else:
         form = ProductForm()
         
-    return render(request, 'userprofile/add_product.html', {'form': form})
+    return render(request, 'userprofile/update_product.html', {
+        'title': 'Add product',
+        'form': form
+    })
+
+@login_required
+def edit_product(request, pk):
+    product = Product.objects.filter(user=request.user).get(pk=pk)
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'The product was updated.')
+            
+            return redirect('staff_page')
+    else:
+        form = ProductForm(instance=product)
+    
+    return render(request, 'userprofile/update_product.html', {
+        'title': 'Edit product',
+        'product': product,
+        'form': form
+    })
+    
+@login_required
+def delete_product(request, pk):
+    product = Product.objects.filter(user=request.user).get(pk=pk)
+    product.status = Product.DELETED
+    product.save()
+    
+    messages.success(request, 'The product was deleted.')
+    
+    return redirect('staff_page')
+    
