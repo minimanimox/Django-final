@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./grocery_env/grocery_store"
+    ]
+}

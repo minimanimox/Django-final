@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+    Add product
+{% endblock title %}
+
+{% block content %}
+    <h1 class="text-2xl">Add product</h1>
+
+    <form method="post" action="." enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="py-4 px-8 bg-teal-500 text-white hover:bg-teal-800">Submit</button>
+    </form>
+{% endblock content %}
