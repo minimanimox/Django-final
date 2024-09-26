@@ -12,7 +12,36 @@
     <form method="post" action=".">
         {% csrf_token %}
 
-        {{ form.as_p }}
+        <div class="mt-2 mb-4">
+            {{ form.first_name.label_tag }}
+            {{ form.first_name }}
+            <!-- 오류 메시지 출력 -->
+            {{ form.first_name.errors }}
+        </div>
+    
+        <div class="mb-4">
+            {{ form.last_name.label_tag }}
+            {{ form.last_name }}
+            {{ form.last_name.errors }}
+        </div>
+    
+        <div class="mb-4">
+            {{ form.address.label_tag }}
+            {{ form.address }}
+            {{ form.address.errors }}
+        </div>
+    
+        <div class="mb-4">
+            {{ form.zipcode.label_tag }}
+            {{ form.zipcode }}
+            {{ form.zipcode.errors }}
+        </div>
+    
+        <div class="mb-4">
+            {{ form.city.label_tag }}
+            {{ form.city }}
+            {{ form.city.errors }}
+        </div>
         <button class="inline-block px-8 py-4 bg-teal-500 text-white">Checkout</button>
     </form>
 {% endblock content %}

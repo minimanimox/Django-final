@@ -10,7 +10,17 @@
     <form method="post" action=".">
         {% csrf_token %}
 
-        {{ form.as_p }}
+        <div class="mb-4">
+            <label for="id_username" class="block">Username</label>
+            {{ form.username }}  <!-- username 필드 -->
+            {{ form.username.errors }}
+        </div>
+
+        <div class="mb-4">
+            <label for="id_password" class="block">Password</label>
+            {{ form.password }}  <!-- password 필드 -->
+            {{ form.password.errors }}
+        </div>
 
         <button class="py-4 px-8 bg-teal-800 text-white">Log in</button>
     </form>

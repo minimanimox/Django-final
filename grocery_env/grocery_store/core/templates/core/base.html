@@ -1,4 +1,5 @@
 {% load menu %}
+{% load static %}
 
 <!DOCTYPE html>
 <html>
@@ -12,12 +13,14 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <nav class="max-w-7xl mx-auto py-4 px-6 flex items-center justify-between bg-teal-600">
+  <body class="relative"> 
+    <div class="absolute inset-0 bg-cover bg-center bg-fixed opacity-50" style="background-image: url('{% static 'images/10122.jpg' %}');"></div>
+    <div class="relative container min-h-screen mx-auto z-10">
+      <nav class="max-w-7xl mx-auto py-4 px-6 flex items-center justify-between bg-teal-600">
         <div class="logo">
-            <a href="/" class="py-2 px-4 text-2xl py-2 px-4 text-white">GroceryNet</a>
+          <a href="/" class="py-2 px-4 text-2xl py-2 px-4 text-white">GroceryNet</a>
         </div>
-
+        
         <div class="search">
           <form method="get" action="/search/" class="flex items-center space-x-4">
             <input type="search" name="query" placeholder="Search the product" class="py-2 px-4 rounded-xl">
@@ -30,29 +33,29 @@
         </div>
         
         <div class="menu flex items-center space-x-4">
-            {% menu %}
-            
-            <a href="{% url "cart_view" %}" class="flex items-center py-2 px-4 bg-teal-800 text-white rounded-xl hover:bg-teal-900"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-            </svg><span class="ml-2">({{ cart|length }})</span>   
-            </a>
-            {% if request.user.is_authenticated %}
-              <a href="{% url "myaccount" %}" class="py-2 px-4 bg-teal-800 text-white rounded-xl hover:bg-teal-900">My account</a>
-              
-              {% if request.user.userprofile.is_staff %}
-                <a href="{% url "staff_page" %}" class="py-2 px-4 bg-teal-800 text-white rounded-xl hover:bg-teal-900">Staff page</a>
-              {% endif %}
-            {% else %}
-              <a href="{% url "login" %}" class="py-2 px-4 bg-teal-800 text-white rounded-xl hover:bg-teal-900">Login</a> 
-              <a href="{% url "signup" %}" class="py-2 px-4 bg-teal-400 text-white rounded-xl hover:bg-teal-300">Sign up</a> 
-            {% endif %}
-        </div>
+          {% menu %}
+          
+          <a href="{% url "cart_view" %}" class="flex items-center py-2 px-4 bg-teal-800 text-white rounded-xl hover:bg-teal-900"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+          </svg><span class="ml-2">({{ cart|length }})</span>   
+        </a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url "myaccount" %}" class="py-2 px-4 bg-teal-800 text-white rounded-xl hover:bg-teal-900">My account</a>
+        
+        {% if request.user.userprofile.is_staff %}
+        <a href="{% url "staff_page" %}" class="py-2 px-4 bg-teal-800 text-white rounded-xl hover:bg-teal-900">Staff page</a>
+        {% endif %}
+        {% else %}
+        <a href="{% url "login" %}" class="py-2 px-4 bg-teal-800 text-white rounded-xl hover:bg-teal-900">Login</a> 
+        <a href="{% url "signup" %}" class="py-2 px-4 bg-teal-400 text-white rounded-xl hover:bg-teal-300">Sign up</a> 
+        {% endif %}
+      </div>
     </nav>
-
-    <div class="max-w-7xl mx-auto py-4 px-6">
+      
+    <div class="max-w-7xl mx-auto py-4 px-6 z-10">
     {% block content %}
     {% endblock content %}
     </div>
-
+  </div>
   </body>
 </html>

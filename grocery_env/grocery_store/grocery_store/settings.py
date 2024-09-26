@@ -127,6 +127,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# static 폴더의 경로를 설정 (STATICFILES_DIRS)
+STATICFILES_DIRS = [
+    BASE_DIR / "grocery_store" / "static",  # static 폴더를 이 경로로 지정
+]
+
 MEDIA_URL ='media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
