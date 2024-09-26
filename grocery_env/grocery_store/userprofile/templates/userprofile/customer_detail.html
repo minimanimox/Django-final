@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+    Customer Information
+{% endblock title %}
+
+{% block content %}
+    <h1 class="text-2xl">Customer Information</h1>
+
+    <div class="mt-4">
+        <p><strong>Username:</strong> {{ customer.username }}</p>
+        <p><strong>First Name:</strong> {{ customer.first_name }}</p>
+        <p><strong>Last Name:</strong> {{ customer.last_name }}</p>
+        <p><strong>Email:</strong> {{ customer.email }}</p>
+    </div>
+    
+    <a href="{% url 'staff_page' %}" class="mt-4 inline-block py-2 px-4 bg-teal-500 text-white rounded">Back to Staff Page</a>
+{% endblock content %}

@@ -20,10 +20,10 @@
         {% csrf_token %}
         <button type="submit" class="mt-6 inline-block py-4 px-8 bg-red-400 text-white">Log out</button>
     </form>
-
+    <hr class="mt-4">
     <!-- 사용자 정보 표시 -->
     <div class="mt-6">
-        <h2 class="text-xl">User Information</h2>
+        <h2 class="mb-4 text-xl">User Information</h2>
 
         {% if request.user.first_name or request.user.last_name or request.user.email %}
             <p><strong>Username:</strong> {{ request.user.username }}</p>
@@ -43,6 +43,8 @@
             Change Password
         </a>
     </div>
+    <hr class="mt-4">
+
     <h1 class="mt-6 mb-6 text-2xl">My order list</h1>
 
     {% if grouped_order_items %}
@@ -71,7 +73,7 @@
                     {{ item.quantity }}
                 </div>
                 <div class="w-1/4">
-                    ${{ item.price }}
+                    ${{ item.product.price|floatformat:2 }}
                 </div>
             </div>
         {% endfor %}

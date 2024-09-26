@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+    {{ customer.username }}'s Orders
+{% endblock title %}
+
+{% block content %}
+    <h1 class="text-2xl">{{ customer.username }}'s Orders</h1>
+
+    {% if orders %}
+        <div class="mt-6">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="py-2 px-4 text-left">Order ID</th>
+                        <th class="py-2 px-4 text-left">Total Amount</th>
+                        <th class="py-2 px-4 text-left">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr class="border-b">
+                        <td class="py-2 px-4">{{ order.id }}</td>
+                        <td class="py-2 px-4">${{ order.paid_amount|floatformat:2 }}</td>
+                        <td class="py-2 px-4">{{ order.get_status_display }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No orders found for this customer.</p>
+    {% endif %}
+
+    <a href="{% url 'customer_list' %}" class="mt-4 inline-block py-2 px-4 bg-teal-500 text-white rounded">Back to Customer List</a>
+{% endblock %}

@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load custom_filters %}
 
 {% block title %}
     Staff Page
@@ -14,55 +15,86 @@
             </div>
         {% endfor %}
     {% endif %}
-    
-    <h2 class="mt-6 text-xl">Order list</h2>
+
+    <h2 class="mt-6 mb-3 text-xl">Order list</h2>
     
     <div class="flex flex-wrap">
-        <div class="w-1/3">
+        <div class="w-1/4">
             <strong>Order_id</strong>
         </div>
-        <div class="w-1/3">
-            <strong>Customer's Name</strong>
+        <div class="w-1/4">
+            <strong>Customer ID</strong>
         </div>
-        <div class="w-1/3">
+        <div class="w-1/4">
+            <strong>Total</strong>
+        </div>
+        <div class="w-1/4">
             <strong>Status</strong>
         </div>
     </div>
 
-    {% for order_item in order_items %}
+    {% for order in orders %}
         <div class="flex flex-wrap">
-           <!-- 주문 번호가 바뀔 때만 출력 -->
-           {% ifchanged order_item.order.id %}
-            <div class="w-1/3">
-                    <a href="{% url 'staff_page_order_detail' order_item.order.id %}">
-                        {{ order_item.order.id }} 
-                    </a>
+            <div class="pt-4 w-1/4">
+                <a href="{% url 'staff_page_order_detail' order.id %}">
+                    {{ order.id }} <!-- 주문 ID 표시 -->
+                </a>
+            </div>
+            <div class="pt-4 w-1/4">
+                <!-- Customer ID 클릭 시 고객 정보로 이동 -->
+                <a href="{% url 'customer_detail' order.created_by.id %}">
+                    {{ order.created_by.username }} <!-- 주문한 고객의 이름 -->
+                </a>
+            </div>
+                
+            <div class="pt-4 w-1/4">
+                {% with total=order_totals|get_item:order.id %}
+                    ${{ total|floatformat:2 }}
+                {% endwith %}
+            </div>
+
+            <div class="w-1/4">
+                <form method="POST" action="{% url 'change_order_status' order.id %}">
+                    {% csrf_token %}
+                    <select name="status" class="py-2 px-4 border rounded">
+                        <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="approved" {% if order.status == 'approved' %}selected{% endif %}>Approved</option>
+                        <option value="denied" {% if order.status == 'denied' %}selected{% endif %}>Denied</option>
+                    </select>
+                    <button type="submit" class="mt-2 ml-2 py-2 px-4 bg-teal-500 hover:bg-teal-700 text-white rounded">
+                        Update
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 해당 주문에 속하는 주문 항목들 출력 -->
+        {% for order_item in order.orderitem_set.all %}
+            <div class="flex flex-wrap ml-8">
+                <div class="w-1/3">
+                    {{ order_item.product.product_name }} <!-- 제품 이름 -->
                 </div>
                 <div class="w-1/3">
-                    {{ order_item.user }} 
+                    {{ order_item.quantity }} <!-- 수량 -->
                 </div>
                 <div class="w-1/3">
-                    <form method="POST" action="{% url 'change_order_status' order_item.order.id %}">
-                        {% csrf_token %}
-                        <select name="status" class="py-2 px-4 border rounded">
-                            <option value="pending" {% if order_item.order.status == 'pending' %}selected{% endif %}>Pending</option>
-                            <option value="approved" {% if order_item.order.status == 'approved' %}selected{% endif %}>Approved</option>
-                            <option value="denied" {% if order_item.order.status == 'denied' %}selected{% endif %}>Denied</option>
-                        </select>
-                        <button type="submit" class="mt-2 ml-2 py-2 px-4 bg-teal-500 hover:bg-teal-700 text-white rounded">
-                            Update
-                        </button>
-                    </form>
+                    ${{ order_item.price|floatformat:2 }} <!-- 가격 -->
                 </div>
-                {% endifchanged %}
-        </div>    
-    {% endfor %}      
+            </div>
+        {% endfor %}
+    {% endfor %}
 
-    <hr>
 
+    <hr class="mt-4">
+
+    <h2 class="mt-6 text-xl">Customer list</h2>
+    <a href="{% url 'customer_list' %}" class="mt-6 mb-6 inline-block py-4 px-8 bg-teal-500 text-white">Click to view</a>
+
+    <hr class="mt-4">
+
+    <h2 class="mt-6 text-xl">Product list</h2>
     <a href="{% url "add_product" %}" class="mt-6 inline-block py-4 px-8 bg-teal-500 text-white">Add product</a>
 
-    <h2 class="mt-6 text-xl">Added products</h2>
 
     {% if products %}
         <div class="flex flex-wrap">

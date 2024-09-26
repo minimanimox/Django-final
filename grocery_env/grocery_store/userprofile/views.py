@@ -66,19 +66,34 @@ def password_change(request):
     
 @login_required    
 def staff_page(request):
-    products = request.user.products.exclude(status=Product.DELETED)
+    products = Product.objects.exclude(status=Product.DELETED)
     
+    # 모든 주문 항목을 가져오기
     order_items = OrderItem.objects.all()
+
+    # 주문 정보 가져오기 (OrderItem을 통해 가져온 주문, 최신 순으로 정렬)
+    orders = Order.objects.filter(id__in=order_items.values_list('order_id', flat=True)).distinct().order_by('-id')
+
+    # 각 주문별로 총 금액 계산
+    order_totals = {}
+    for order in orders:
+        # 해당 주문의 OrderItem을 필터링하여 Product.price와 quantity로 총 금액 계산
+        total = sum(item.product.price * item.quantity for item in order.items.all())  # Product.price로 계산
+        order_totals[order.id] = total
+        
+        # 디버깅 출력: 각 주문의 총 금액이 제대로 계산되는지 확인
+        print(f"Order ID: {order.id}, Total: {total}")
     
-    # 주문 정보 가져오기 (OrderItem을 통해 가져온 주문)
-    orders = Order.objects.filter(id__in=order_items.values_list('order_id', flat=True)).distinct()
+    # 디버깅 출력: 최종 order_totals 딕셔너리 확인
+    print(f"Order Totals: {order_totals}")
     
     return render(request, 'userprofile/staff_page.html', {
         'orders': orders,
         'products': products,
-        'order_items': order_items
+        'order_items': order_items,
+        'order_totals': order_totals,  # 총 금액을 템플릿에 전달
     })
-
+    
 @login_required
 def staff_page_order_detail(request, pk):
     order = get_object_or_404(Order, pk=pk)
@@ -104,6 +119,35 @@ def change_order_status(request, order_id):
     messages.success(request, f'Order number: {order.id} Status was successfully updated to {order.status}.')
     
     return redirect('staff_page')
+
+@login_required
+def customer_list(request):
+    # 모든 고객 목록을 가져옵니다.
+    customers = User.objects.all()
+
+    return render(request, 'userprofile/customer_list.html', {
+        'customers': customers
+    })
+
+@login_required
+def customer_orders(request, user_id):
+    # 해당 고객의 주문 목록을 가져옵니다.
+    customer = get_object_or_404(User, id=user_id)
+    orders = Order.objects.filter(created_by=customer)
+
+    return render(request, 'userprofile/customer_orders.html', {
+        'customer': customer,
+        'orders': orders
+    })
+    
+@login_required
+def customer_detail(request, user_id):
+    # user_id를 기준으로 고객 정보 가져오기
+    customer = get_object_or_404(User, id=user_id)
+
+    return render(request, 'userprofile/customer_detail.html', {
+        'customer': customer,
+    })
     
 @login_required
 def myaccount(request):
@@ -126,7 +170,7 @@ def myaccount(request):
         grouped_order_items[item.order.id].append(item)
         if item.order.id not in order_totals:
             order_totals[item.order.id] = 0
-        order_totals[item.order.id] += item.quantity * item.price
+        order_totals[item.order.id] += item.quantity * item.product.price
         # 주문 상태 저장
         order_statuses[item.order.id] = item.order.status
 
@@ -135,9 +179,7 @@ def myaccount(request):
         # print(f"Grouped Order Items: {grouped_order_items}")
         # print(f"Order Totals: {order_totals}")
 
-    print("test")        
-    print(grouped_order_items.items())
-    grouped_items = grouped_order_items.items()
+    grouped_items = sorted(grouped_order_items.items(), key=lambda x: x[0], reverse=True)
     
     return render(request, 'userprofile/myaccount.html', {
         'grouped_items': grouped_items,
@@ -189,32 +231,35 @@ def add_product(request):
 
 @login_required
 def edit_product(request, pk):
-    product = Product.objects.filter(user=request.user).get(pk=pk)
-    
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
+    # 일반 사용자는 수정 권한이 없으므로 staff만 수정 가능
+    if request.user.is_staff:
         
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'The product was updated.')
-            
-            return redirect('staff_page')
-    else:
-        form = ProductForm(instance=product)
-    
-    return render(request, 'userprofile/update_product.html', {
-        'title': 'Edit product',
-        'product': product,
-        'form': form
-    })
+        product = get_object_or_404(Product, pk=pk)
+
+        if request.method == 'POST':
+            form = ProductForm(request.POST, request.FILES, instance=product)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'The product was updated.')
+                return redirect('staff_page')
+        else:
+            form = ProductForm(instance=product)
+
+        return render(request, 'userprofile/update_product.html', {
+            'title': 'Edit product',
+            'product': product,
+            'form': form
+        })
     
 @login_required
 def delete_product(request, pk):
-    product = Product.objects.filter(user=request.user).get(pk=pk)
-    product.status = Product.DELETED
-    product.save()
-    
-    messages.success(request, 'The product was deleted.')
-    
-    return redirect('staff_page')
-    
+    # 일반 사용자는 삭제 권한이 없으므로 staff만 삭제 가능
+    if request.user.is_staff:
+        
+        product = get_object_or_404(Product, pk=pk)
+        product.status = Product.DELETED
+        product.save()
+
+        messages.success(request, 'The product was deleted.')
+        return redirect('staff_page')
+        

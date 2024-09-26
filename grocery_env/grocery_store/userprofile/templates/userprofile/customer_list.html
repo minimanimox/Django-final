@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+    Customer List
+{% endblock title %}
+
+{% block content %}
+    <h1 class="text-2xl">Customer List</h1>
+
+    <div class="mt-6">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="py-2 px-4 text-left">Username</th>
+                    <th class="py-2 px-4 text-left">Email</th>
+                    <th class="py-2 px-4 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr class="border-b">
+                    <td class="py-2 px-4">{{ customer.username }}</td>
+                    <td class="py-2 px-4">{{ customer.email }}</td>
+                    <td class="py-2 px-4">
+                        <a href="{% url 'customer_orders' customer.id %}" class="text-blue-500">View Orders</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
