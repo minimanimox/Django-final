@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load custom_filters %}
 
 {% block title %}
     My account
@@ -12,42 +13,50 @@
         <button type="submit" class="mt-6 inline-block py-4 px-8 bg-red-400 text-white">Log out</button>
     </form>
 
-    <h1 class="mb-6 text-2xl">My order list</h1>
+    <h1 class="mt-6 mb-6 text-2xl">My order list</h1>
 
-    {% if order_items %}
-    
-        {% for order_item in order_items %} 
-        {% comment %} <h2 class="mb-3 text-xl">Product list of order number: {{ order_item.order.id }}</h2> {% endcomment %}
+    {% if grouped_order_items %}
+        
+    {% for order_id, items in grouped_items %}
+        <h2 class="mb-3 text-xl">Order number: {{ order_id }} - Status: {{ order_statuses|get_item:order_id }}</h2> <!-- 주문 상태 출력 -->
 
         <div class="flex flex-wrap">
-            <div class="w-1/4">
-                <strong>Order number</strong>
-            </div>
             <div class="w-1/4">
                 <strong>Product name</strong>
             </div>
             <div class="w-1/4">
-                <strong>Quantity</strong> 
+                <strong>Quantity</strong>
             </div>
             <div class="w-1/4">
-                <strong>Total price</strong>
+                <strong>Unit price</strong>
             </div>
         </div>
+
+        {% for item in items %}
             <div class="flex flex-wrap">
                 <div class="w-1/4">
-                        {{ order_item.order.id }} 
+                    {{ item.product.product_name }}
                 </div>
                 <div class="w-1/4">
-                    {{ order_item.product.product_name }}
+                    {{ item.quantity }}
                 </div>
                 <div class="w-1/4">
-                    {{ order_item.quantity }}
+                    ${{ item.price }}
                 </div>
-                <div class="w-1/4">
-                    ${{ order_item.total_price }}
-                </div>
-            </div>    
-        {% endfor %}   
+            </div>
+        {% endfor %}
+    
+        <div class="flex flex-wrap mt-2">
+            <div class="w-1/4 font-bold">
+                Total price:
+            </div>
+            <div class="w-1/4">
+                ${{ order_totals|get_item:order_id }} <!-- 커스텀 필터로 총합 가져오기 -->
+            </div>
+        </div>
+        <hr class="mt-4 mb-4">
+    {% endfor %}
+
     {% else %}
         <div class="px-6 py-6 bg-gray-300">
             You don't have any purchase record

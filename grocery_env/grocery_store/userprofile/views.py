@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from .models import Userprofile
 from store.forms import ProductForm
 from store.models import Product, OrderItem, Order
+from collections import defaultdict
 import uuid
 
 def signup(request):
@@ -49,24 +50,43 @@ def staff_page_order_detail(request, pk):
     
 @login_required
 def myaccount(request):
-    # 현재 로그인한 사용자가 생성한 주문들 가져오기
+    # 현재 로그인한 사용자의 주문들 가져오기
     orders = Order.objects.filter(created_by=request.user)
-    print(f"request user: {request.user}")
-    print(f"created_by: {Order.created_by}")
-
-    # 주문 항목 가져오기: 로그인한 사용자가 만든 주문들에 대한 OrderItem
+    
+    # 주문 항목 가져오기
     order_items = OrderItem.objects.filter(order__in=orders)
+    
+    # 주문 별로 그룹화 및 총 금액 계산
+    grouped_order_items = defaultdict(list)
+    order_totals = {}
+    order_statuses = {}  # 주문 상태 저장
+    
+    # 디버깅을 위한 print 문
+    print(f"Orders: {orders}")  # 사용자의 주문 목록
+    print(f"Order Items: {order_items}")  # 주문 항목 목록
+    
+    for item in order_items:
+        grouped_order_items[item.order.id].append(item)
+        if item.order.id not in order_totals:
+            order_totals[item.order.id] = 0
+        order_totals[item.order.id] += item.quantity * item.price
+        # 주문 상태 저장
+        order_statuses[item.order.id] = item.order.status
 
-    # 디버깅: 데이터가 제대로 가져오는지 출력해보기
-    print(f"Orders: {orders}")
-    print(f"Order Items: {order_items}")
+        # 각 주문 항목이 그룹화되는 과정 디버깅
+        # print(f"Order ID: {item.order.id}, Product: {item.product.product_name}, Quantity: {item.quantity}, Price: {item.price}")
+        # print(f"Grouped Order Items: {grouped_order_items}")
+        # print(f"Order Totals: {order_totals}")
 
-    for order_item in order_items:
-        order_item.total_price = order_item.quantity * order_item.product.price
-        
+    print("test")        
+    print(grouped_order_items.items())
+    grouped_items = grouped_order_items.items()
+    
     return render(request, 'userprofile/myaccount.html', {
-        'orders': orders,
-        'order_items': order_items,
+        'grouped_items': grouped_items,
+        'grouped_order_items': grouped_order_items,  # 그룹화된 주문 항목
+        'order_totals': order_totals,  # 주문별 총합 계산
+        'order_statuses': order_statuses,  # 주문 상태 전달
     })
 
 def staff_detail(request, pk):
