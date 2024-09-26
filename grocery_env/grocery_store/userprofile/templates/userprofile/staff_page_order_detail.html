@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+
+{% block title %}
+    Order detail - {{ order.id }}
+{% endblock title %}
+
+{% block content %}
+    <h1 class="mb-6 text-2xl">Order detail - {{ order.id }}</h1>
+
+    <h2 class="mb-3 text-xl">Product list in this order</h2>
+
+    <div class="flex flex-wrap">
+        <div class="w-1/3">
+            <strong>Product name</strong>
+        </div>
+        <div class="w-1/3">
+            <strong>Quantity</strong> 
+        </div>
+        <div class="w-1/3">
+            <strong>Unit price</strong>
+        </div>
+    </div>
+    {% for item in order.items.all %}
+        <div class="flex flex-wrap">
+            <div class="w-1/3">
+                {{ item.product.product_name }}
+            </div>
+            <div class="w-1/3">
+                {{ item.quantity }}
+            </div>
+            <div class="w-1/3">
+                ${{ item.product.price }}
+            </div>
+        </div>    
+    {% endfor %}
+{% endblock content %}

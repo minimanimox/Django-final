@@ -7,5 +7,51 @@
 {% block content %}
     <h1 class="text-2xl">My account</h1>
 
-    <a href="{% url "logout" %}" class="mt-6 inline-block py-4 px-8 bg-red-400 text-white">Log out</a>
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="mt-6 inline-block py-4 px-8 bg-red-400 text-white">Log out</button>
+    </form>
+
+    <h1 class="mb-6 text-2xl">My order list</h1>
+
+    {% if order_items %}
+    
+        {% for order_item in order_items %} 
+        {% comment %} <h2 class="mb-3 text-xl">Product list of order number: {{ order_item.order.id }}</h2> {% endcomment %}
+
+        <div class="flex flex-wrap">
+            <div class="w-1/4">
+                <strong>Order number</strong>
+            </div>
+            <div class="w-1/4">
+                <strong>Product name</strong>
+            </div>
+            <div class="w-1/4">
+                <strong>Quantity</strong> 
+            </div>
+            <div class="w-1/4">
+                <strong>Total price</strong>
+            </div>
+        </div>
+            <div class="flex flex-wrap">
+                <div class="w-1/4">
+                        {{ order_item.order.id }} 
+                </div>
+                <div class="w-1/4">
+                    {{ order_item.product.product_name }}
+                </div>
+                <div class="w-1/4">
+                    {{ order_item.quantity }}
+                </div>
+                <div class="w-1/4">
+                    ${{ order_item.total_price }}
+                </div>
+            </div>    
+        {% endfor %}   
+    {% else %}
+        <div class="px-6 py-6 bg-gray-300">
+            You don't have any purchase record
+        </div>
+    {% endif %}
+    
 {% endblock content %}

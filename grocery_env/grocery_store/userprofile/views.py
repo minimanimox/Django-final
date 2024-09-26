@@ -3,11 +3,11 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 from .models import Userprofile
 from store.forms import ProductForm
-from store.models import Product
+from store.models import Product, OrderItem, Order
 import uuid
 
 def signup(request):
@@ -32,15 +32,42 @@ def signup(request):
 @login_required    
 def staff_page(request):
     products = request.user.products.exclude(status=Product.DELETED)
+    order_items = OrderItem.objects.filter(product__user=request.user)
     
     return render(request, 'userprofile/staff_page.html', {
-        'products': products
+        'products': products,
+        'order_items': order_items
     })
 
 @login_required
+def staff_page_order_detail(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    
+    return render(request, 'userprofile/staff_page_order_detail.html', {
+        'order': order
+    })
+    
+@login_required
 def myaccount(request):
-    return render(request, 'userprofile/myaccount.html')
+    # 현재 로그인한 사용자가 생성한 주문들 가져오기
+    orders = Order.objects.filter(created_by=request.user)
+    print(f"request user: {request.user}")
+    print(f"created_by: {Order.created_by}")
 
+    # 주문 항목 가져오기: 로그인한 사용자가 만든 주문들에 대한 OrderItem
+    order_items = OrderItem.objects.filter(order__in=orders)
+
+    # 디버깅: 데이터가 제대로 가져오는지 출력해보기
+    print(f"Orders: {orders}")
+    print(f"Order Items: {order_items}")
+
+    for order_item in order_items:
+        order_item.total_price = order_item.quantity * order_item.product.price
+        
+    return render(request, 'userprofile/myaccount.html', {
+        'orders': orders,
+        'order_items': order_items,
+    })
 
 def staff_detail(request, pk):
     user = User.objects.get(pk=pk)

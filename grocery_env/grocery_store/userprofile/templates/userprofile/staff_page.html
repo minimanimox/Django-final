@@ -14,6 +14,45 @@
             </div>
         {% endfor %}
     {% endif %}
+
+    <h2 class="mt-6 text-xl">Order list</h2>
+    
+    <div class="flex flex-wrap">
+        <div class="w-1/4">
+            <strong>Order_id</strong>
+        </div>
+        <div class="w-1/4">
+            <strong>Product name</strong>
+        </div>
+        <div class="w-1/4">
+            <strong>Quantity</strong>
+        </div>
+        <div class="w-1/4">
+            <strong>Unit price</strong>
+        </div>
+    </div>
+
+    {% for order_item in order_items %}
+        <div class="flex flex-wrap">
+            <div class="w-1/4">
+                <a href="{% url "staff_page_order_detail" order_item.order.id %}">
+                    {{ order_item.order.id }} 
+                </a>
+            </div>
+            <div class="w-1/4">
+                {{ order_item.product.product_name }}
+            </div>
+            <div class="w-1/4">
+                {{ order_item.quantity }}
+            </div>
+            <div class="w-1/4">
+                ${{ order_item.product.price }}
+            </div>
+        </div>    
+    {% endfor %}        
+
+    <hr>
+
     <a href="{% url "add_product" %}" class="mt-6 inline-block py-4 px-8 bg-teal-500 text-white">Add product</a>
 
     <h2 class="mt-6 text-xl">Added products</h2>
