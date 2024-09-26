@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 from .models import Userprofile
 from store.forms import ProductForm
+from userprofile.forms import UserProfileForm, CustomPasswordChangeForm
 from store.models import Product, OrderItem, Order
 from collections import defaultdict
 import uuid
@@ -29,13 +30,51 @@ def signup(request):
     return render(request, 'userprofile/signup.html', {
         'form': form
     })
+    
+@login_required
+def profile_update(request):
+    if request.method == 'POST':
+        user_form = UserProfileForm(request.POST, instance=request.user)
 
+        if user_form.is_valid():
+            user_form.save()
+            messages.success(request, 'Your profile was successfully updated!')
+            return redirect('myaccount')  # 업데이트 후 myaccount로 리다이렉트
+    else:
+        user_form = UserProfileForm(instance=request.user)
+
+    return render(request, 'userprofile/profile_update.html', {
+        'user_form': user_form
+    })
+
+@login_required
+def password_change(request):
+    if request.method == 'POST':
+        password_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
+
+        if password_form.is_valid():
+            password_form.save()
+            update_session_auth_hash(request, password_form.user)  # 로그아웃 방지
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('myaccount')  # 업데이트 후 myaccount로 리다이렉트
+    else:
+        password_form = CustomPasswordChangeForm(user=request.user)
+
+    return render(request, 'userprofile/password_change.html', {
+        'password_form': password_form
+    })
+    
 @login_required    
 def staff_page(request):
     products = request.user.products.exclude(status=Product.DELETED)
-    order_items = OrderItem.objects.filter(product__user=request.user)
+    
+    order_items = OrderItem.objects.all()
+    
+    # 주문 정보 가져오기 (OrderItem을 통해 가져온 주문)
+    orders = Order.objects.filter(id__in=order_items.values_list('order_id', flat=True)).distinct()
     
     return render(request, 'userprofile/staff_page.html', {
+        'orders': orders,
         'products': products,
         'order_items': order_items
     })
@@ -47,6 +86,24 @@ def staff_page_order_detail(request, pk):
     return render(request, 'userprofile/staff_page_order_detail.html', {
         'order': order
     })
+ 
+@login_required
+def change_order_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    
+    # 상태 변경 로직 (여기서는 순환 방식으로 처리)
+    if order.status == Order.PENDING:
+        order.status = Order.APPROVED
+    elif order.status == Order.APPROVED:
+        order.status = Order.DENIED
+    else:
+        order.status = Order.PENDING
+    
+    order.save()
+
+    messages.success(request, f'Order number: {order.id} Status was successfully updated to {order.status}.')
+    
+    return redirect('staff_page')
     
 @login_required
 def myaccount(request):

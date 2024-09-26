@@ -8,11 +8,41 @@
 {% block content %}
     <h1 class="text-2xl">My account</h1>
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mt-4 px-8 py-4 bg-teal-200 text-teal-800">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <form method="POST" action="{% url 'logout' %}">
         {% csrf_token %}
         <button type="submit" class="mt-6 inline-block py-4 px-8 bg-red-400 text-white">Log out</button>
     </form>
 
+    <!-- 사용자 정보 표시 -->
+    <div class="mt-6">
+        <h2 class="text-xl">User Information</h2>
+
+        {% if request.user.first_name or request.user.last_name or request.user.email %}
+            <p><strong>Username:</strong> {{ request.user.username }}</p>
+            <p><strong>First Name:</strong> {{ request.user.first_name }}</p>
+            <p><strong>Last Name:</strong> {{ request.user.last_name }}</p>
+            <p><strong>Email:</strong> {{ request.user.email }}</p>
+        {% else %}
+            <p class="text-red-500">Update your information</p>
+        {% endif %}
+        
+        <!-- Update User Info 버튼 추가 -->
+        <a href="{% url 'profile_update' %}" class="mt-4 inline-block py-2 px-4 bg-teal-500 text-white rounded">
+            Update User Info
+        </a>
+
+        <a href="{% url 'password_change' %}" class="mt-4 inline-block py-2 px-4 bg-green-500 text-white rounded">
+            Change Password
+        </a>
+    </div>
     <h1 class="mt-6 mb-6 text-2xl">My order list</h1>
 
     {% if grouped_order_items %}

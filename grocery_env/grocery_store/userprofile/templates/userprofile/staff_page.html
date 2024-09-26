@@ -14,42 +14,49 @@
             </div>
         {% endfor %}
     {% endif %}
-
+    
     <h2 class="mt-6 text-xl">Order list</h2>
     
     <div class="flex flex-wrap">
-        <div class="w-1/4">
+        <div class="w-1/3">
             <strong>Order_id</strong>
         </div>
-        <div class="w-1/4">
-            <strong>Product name</strong>
+        <div class="w-1/3">
+            <strong>Customer's Name</strong>
         </div>
-        <div class="w-1/4">
-            <strong>Quantity</strong>
-        </div>
-        <div class="w-1/4">
-            <strong>Unit price</strong>
+        <div class="w-1/3">
+            <strong>Status</strong>
         </div>
     </div>
 
     {% for order_item in order_items %}
         <div class="flex flex-wrap">
-            <div class="w-1/4">
-                <a href="{% url "staff_page_order_detail" order_item.order.id %}">
-                    {{ order_item.order.id }} 
-                </a>
-            </div>
-            <div class="w-1/4">
-                {{ order_item.product.product_name }}
-            </div>
-            <div class="w-1/4">
-                {{ order_item.quantity }}
-            </div>
-            <div class="w-1/4">
-                ${{ order_item.product.price }}
-            </div>
+           <!-- 주문 번호가 바뀔 때만 출력 -->
+           {% ifchanged order_item.order.id %}
+            <div class="w-1/3">
+                    <a href="{% url 'staff_page_order_detail' order_item.order.id %}">
+                        {{ order_item.order.id }} 
+                    </a>
+                </div>
+                <div class="w-1/3">
+                    {{ order_item.user }} 
+                </div>
+                <div class="w-1/3">
+                    <form method="POST" action="{% url 'change_order_status' order_item.order.id %}">
+                        {% csrf_token %}
+                        <select name="status" class="py-2 px-4 border rounded">
+                            <option value="pending" {% if order_item.order.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="approved" {% if order_item.order.status == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="denied" {% if order_item.order.status == 'denied' %}selected{% endif %}>Denied</option>
+                        </select>
+                        <button type="submit" class="mt-2 ml-2 py-2 px-4 bg-teal-500 hover:bg-teal-700 text-white rounded">
+                            Update
+                        </button>
+                    </form>
+                </div>
+                {% endifchanged %}
         </div>    
-    {% endfor %}        
+    {% endfor %}      
 
     <hr>
 
